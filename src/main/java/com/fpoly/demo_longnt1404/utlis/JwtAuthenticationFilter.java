@@ -1,6 +1,8 @@
 package com.fpoly.demo_longnt1404.utlis;
 
 import com.fpoly.demo_longnt1404.service.impl.CustomUserDetailService;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,10 +27,47 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
+//    @Override
+//    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+//            throws ServletException, IOException {
+//
+//        // Get Authorization header from request
+//        final String authorizationHeader = request.getHeader("Authorization");
+//
+//        String username = null;
+//        String jwt = null;
+//
+//        // Check if Authorization header contains JWT token
+//        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+//            jwt = authorizationHeader.substring(7); // Lấy token sau từ khóa "Bearer "
+//            username = jwtUtil.extractUsername(jwt); // Trích xuất tên người dùng từ token
+//        }
+//
+//        // If token is valid and user is not authenticated, authenticate user
+//        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+//
+//            // Get user information from database
+//            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+//
+//            // If token is valid, authenticate user
+//            if (jwtUtil.validateToken(jwt, userDetails.getUsername())) {
+//                // Create UsernamePasswordAuthenticationToken with user information and authentication from request
+//                UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken =
+//                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+//                usernamePasswordAuthenticationToken
+//                        // Set details of authentication from request
+//                        .setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+//                SecurityContextHolder.getContext().setAuthentication(usernamePasswordAuthenticationToken);
+//            }
+//        }
+//        chain.doFilter(request, response);
+//    }
+//
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
+        throws ServletException, IOException {
 
+    try {
         // Get Authorization header from request
         final String authorizationHeader = request.getHeader("Authorization");
 
@@ -59,6 +98,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
         }
         chain.doFilter(request, response);
+    } catch (ExpiredJwtException e) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("Token has expired");
+    } catch (JwtException e) {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("Token is invalid");
     }
+}
 }
 

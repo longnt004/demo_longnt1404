@@ -40,7 +40,6 @@ public class RecoveryPasswordController {
             // If the account exists, generate OTP code and send it to the user's email
             String otp = otpService.generatorOTP(user);
             System.out.println("OTP: " + otp);
-
                 emailService.sendEmail(user.getEmail(), "Recovery Password", "Your OTP code is: " + otp);
                 return ResponseEntity.ok(Map.of("message", "OTP code has been sent to your email"));
 

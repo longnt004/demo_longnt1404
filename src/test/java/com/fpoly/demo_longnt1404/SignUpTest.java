@@ -115,6 +115,30 @@ public class SignUpTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(userDTO)))
                 .andExpect(status().isBadRequest())  // Check the status code is 400
+                .andExpect(jsonPath("$.password").value("Password is required"));  // Check validation message
+    }
+
+    @Test
+    void testCreateUserFail_passwordIsInvalid() throws Exception {
+        // Create UserDTO object
+        UserDTO userDTO = new UserDTO();
+        userDTO.setUsername("user");
+        userDTO.setPassword("1234");
+        userDTO.setEmail("longnt14042004@gmail.com");
+        userDTO.setFullname("Nguyen Trong Long");
+        userDTO.setRoles(List.of(new RoleDTO(2, "USER")));
+
+        // Initialize MockMvc object
+        MockMvc mockMvc = MockMvcBuilders
+                .standaloneSetup(signUpController)
+                .setControllerAdvice(new GlobalExceptionHandler())  // Register GlobalExceptionHandler
+                .build();
+
+        // Send POST request to /signup
+        mockMvc.perform(post("/api/users")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(userDTO)))
+                .andExpect(status().isBadRequest())  // Check the status code is 400
                 .andExpect(jsonPath("$.password").value("Password must contain at least 8 characters, including uppercase, lowercase letters and numbers"));  // Check validation message
     }
 

@@ -8,6 +8,7 @@ import com.fpoly.demo_longnt1404.utlis.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -57,6 +58,10 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         // Custom authentication entry point
                         .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        // Custom access denied handler
+                        .accessDeniedHandler((request, response, accessDeniedException) -> {
+                            throw new AccessDeniedException("You do not have permission to access this resource");
+                        })
                 )
                 .sessionManagement(sessionManagement -> sessionManagement
                         // STATELESS: No session will be created or used by Spring Security
